@@ -4,12 +4,13 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
+using std::cout;
 void mergeSequential(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
 
     vector<int> L(n1), R(n2);
-
+    //Copiando datos a los vectores temporales L[] y R[]
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
@@ -98,11 +99,14 @@ void mergeParallel(vector<int>& arr, int l, int m, int r) {
     t2.join();
 }
 
-void mergeSortSequential(vector<int>& arr, int l, int r) {
+void mergeSortSecuencial
+(vector<int>& arr, int l, int r) {
     if (l < r) {
         int m = l + (r - l) / 2;
-        mergeSortSequential(arr, l, m);
-        mergeSortSequential(arr, m + 1, r);
+        mergeSortSecuencial
+        (arr, l, m);
+        mergeSortSecuencial
+        (arr, m + 1, r);
         mergeSequential(arr, l, m, r);
     }
 }
@@ -110,7 +114,8 @@ void mergeSortSequential(vector<int>& arr, int l, int r) {
 void mergeSortParallel(vector<int>& arr, int l, int r, int profundidad) {
     if (l < r) {
         if (profundidad <= 0) {
-            mergeSortSequential(arr, l, r);
+            mergeSortSecuencial
+            (arr, l, r);
             return;
         }
         
@@ -329,7 +334,8 @@ int main() {
     cout << endl;
     // Inicia el conteo .
     auto startSequential = high_resolution_clock::now();
-    mergeSortSequential(arr, 0, arr_size - 1);
+    mergeSortSecuencial
+    (arr, 0, arr_size - 1);
      // Finaliza el conteo después de ejecutar el algoritmo.
     auto stopSequential = high_resolution_clock::now();
      // Se calcula la duración total de la ejecución restando los tiempos de inicio y finalización.
