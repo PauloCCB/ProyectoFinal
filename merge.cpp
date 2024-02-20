@@ -4,24 +4,20 @@
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
-// Función para combinar dos subvectores ordenados en un solo vector ordenado (secuencial)
 void mergeSequential(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
 
-    // Crear vectores temporales
     vector<int> L(n1), R(n2);
 
-    // Copiar datos a los vectores temporales L[] y R[]
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
         R[j] = arr[m + 1 + j];
 
-    // Combinar los vectores temporales de nuevo en arr[l..r]
-    int i = 0; // Índice inicial del primer subvector
-    int j = 0; // Índice inicial del segundo subvector
-    int k = l; // Índice inicial del subvector combinado
+    int i = 0; 
+    int j = 0; 
+    int k = l; 
     while (i < n1 && j < n2) {
         if (L[i] <= R[j]) {
             arr[k] = L[i];
@@ -33,15 +29,12 @@ void mergeSequential(vector<int>& arr, int l, int m, int r) {
         }
         k++;
     }
-
-    // Copiar los elementos restantes de L[], si los hay
     while (i < n1) {
         arr[k] = L[i];
         i++;
         k++;
     }
 
-    // Copiar los elementos restantes de R[], si los hay
     while (j < n2) {
         arr[k] = R[j];
         j++;
@@ -49,21 +42,17 @@ void mergeSequential(vector<int>& arr, int l, int m, int r) {
     }
 }
 
-// Función para realizar la fusión de dos subvectores ordenados en paralelo
 void mergeParallel(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
 
-    // Crear vectores temporales
     vector<int> L(n1), R(n2);
 
-    // Copiar datos a los vectores temporales L[] y R[]
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
         R[j] = arr[m + 1 + j];
 
-    // Threads para fusionar los dos subvectores en paralelo
     thread t1([&arr, &L, &n1, &R, &n2, &l]() {
         int i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
@@ -105,28 +94,19 @@ void mergeParallel(vector<int>& arr, int l, int m, int r) {
             k--;
         }
     });
-
-    // Esperar a que ambos hilos terminen
     t1.join();
     t2.join();
 }
 
-// Función principal que implementa el algoritmo de merge sort de manera secuencial
 void mergeSortSequential(vector<int>& arr, int l, int r) {
     if (l < r) {
-        // Encuentra el punto medio del vector
         int m = l + (r - l) / 2;
-
-        // Ordena primero y segundo subvectores
         mergeSortSequential(arr, l, m);
         mergeSortSequential(arr, m + 1, r);
-
-        // Combina los subvectores ordenados
         mergeSequential(arr, l, m, r);
     }
 }
 
-// Función principal que implementa el algoritmo de merge sort con paralelismo
 void mergeSortParallel(vector<int>& arr, int l, int r, int depth) {
     if (l < r) {
         if (depth <= 0) {
@@ -134,18 +114,12 @@ void mergeSortParallel(vector<int>& arr, int l, int r, int depth) {
             return;
         }
         
-        // Encuentra el punto medio del vector
         int m = l + (r - l) / 2;
-
-        // Ordena primero y segundo subvectores en paralelo
         thread t1(mergeSortParallel, ref(arr), l, m, depth - 1);
         thread t2(mergeSortParallel, ref(arr), m + 1, r, depth - 1);
-
-        // Espera a que ambos hilos terminen
         t1.join();
         t2.join();
 
-        // Combina los subvectores ordenados en paralelo
         mergeParallel(arr, l, m, r);
     }
 }
@@ -361,7 +335,6 @@ int main() {
         cout << arr[i] << " ";
     cout << endl;
 
-    // Vector original para el merge sort paralelo
     vector<int> arr_parallel = arr;  
 
     auto startParallel = high_resolution_clock::now();
