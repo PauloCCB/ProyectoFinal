@@ -14,7 +14,6 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
     int n2 = r - m;
 
     vector<int> L(n1), R(n2);
-    //Copiando datos a los vectores temporales L[] y R[]
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
@@ -39,7 +38,6 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
         i++;
         k++;
     }
-
     while (j < n2) {
         arr[k] = R[j];
         j++;
@@ -50,16 +48,13 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
 void mergeParalelo(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
-
     vector<int> L(n1), R(n2);
-
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
         R[j] = arr[m + 1 + j];
 
     mutex mtx; // Declarar el mutex
-
     thread t1([&arr, &L, &n1, &R, &n2, &l, &mtx]() {
         int i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
@@ -84,7 +79,6 @@ void mergeParalelo(vector<int>& arr, int l, int m, int r) {
             mtx.unlock();
         }
     });
-
     thread t2([&arr, &L, &n1, &R, &n2, &l, &m, &r, &mtx]() {
         int i = n1 - 1, j = n2 - 1, k = r;
         while (i >= 0 && j >= 0) {
@@ -100,7 +94,6 @@ void mergeParalelo(vector<int>& arr, int l, int m, int r) {
             mtx.unlock();
             k--;
         }
-
         while (j >= 0) {
             mtx.lock();
             arr[k] = R[j];
@@ -124,7 +117,6 @@ void mergeSortSecuencial
         mergeSecuencial(arr, l, m, r);
     }
 }
-
 void mergeSortParallel(vector<int>& arr, int l, int r, int profundidad) {
     if (l < r) {
         if (profundidad <= 0) {
@@ -176,7 +168,7 @@ int main() {
 
     cout << "Tiempo secuencial: " << durationSequential.count() << " ms" << endl;
     cout << "Tiempo paralelo: " << durationParallel.count() << "ms" << endl;
-    
+
     double speedup = static_cast<double>(durationSequential.count()) / durationParallel.count();
     cout<<"Speedup: "<<speedup<<endl;
     int num_threads=4;

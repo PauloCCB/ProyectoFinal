@@ -11,9 +11,7 @@ using std::cout;
 void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
-
     vector<int> L(n1), R(n2);
-    //Copiando datos a los vectores temporales L[] y R[]
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
@@ -25,12 +23,10 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
     while (i < n1 && j < n2) {
         if (L[i] <= R[j]) {
             arr[k] = L[i];
-            i++;
-        }
-        else {
+            i++;}
+            else {
             arr[k] = R[j];
-            j++;
-        }
+            j++; }
         k++;
     }
     while (i < n1) {
@@ -38,7 +34,6 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
         i++;
         k++;
     }
-
     while (j < n2) {
         arr[k] = R[j];
         j++;
@@ -49,49 +44,39 @@ void mergeSecuencial(vector<int>& arr, int l, int m, int r) {
 void mergeParalelo(vector<int>& arr, int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
-
     vector<int> L(n1), R(n2);
-
     for (int i = 0; i < n1; i++)
         L[i] = arr[l + i];
     for (int j = 0; j < n2; j++)
         R[j] = arr[m + 1 + j];
-
     thread t3([&arr, &L, &n1, &R, &n2, &l]() {
         int i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
             if (L[i] <= R[j]) {
                 arr[k] = L[i];
                 i++;
-            }
-            else {
+            }else {
                 arr[k] = R[j];
-                j++;
-            }
+                j++;}
             k++;
         }
-
         while (i < n1) {
             arr[k] = L[i];
             i++;
             k++;
         }
     });
-
     thread t4([&arr, &L, &n1, &R, &n2, &l, &m, &r]() {
         int i = n1 - 1, j = n2 - 1, k = r;
         while (i >= 0 && j >= 0) {
             if (L[i] >= R[j]) {
                 arr[k] = L[i];
                 i--;
-            }
-            else {
+            }else {
                 arr[k] = R[j];
-                j--;
-            }
+                j--;}
             k--;
         }
-
         while (j >= 0) {
             arr[k] = R[j];
             j--;
@@ -146,25 +131,24 @@ int main() {
         file.close();
     } 
     int arr_size = arr.size();
-    // Inicia el conteo .
-    auto startSequential = high_resolution_clock::now();
-    mergeSortSecuencial
-    (arr, 0, arr_size - 1);
+    // Inicia el conteo de tiempo .
+    auto inicioSecuencial = high_resolution_clock::now();
+    mergeSortSecuencial(arr, 0, arr_size - 1);
      // Finaliza el conteo después de ejecutar el algoritmo.
-    auto stopSequential = high_resolution_clock::now();
+    auto finalizaSecuencial = high_resolution_clock::now();
      // Se calcula la duración total de la ejecución restando los tiempos de inicio y finalización.
-    auto durationSequential = duration_cast<microseconds>(stopSequential - startSequential);
+    auto duracionSecuencial = duration_cast<microseconds>(finalizaSecuencial - inicioSecuencial);
 
     vector<int> arr_parallel = arr;  
 
-    auto startParallel = high_resolution_clock::now();
+    auto iniciaParalela = high_resolution_clock::now();
     mergeSortParallel(arr_parallel, 0, arr_size - 1, 2);
-    auto stopParallel = high_resolution_clock::now();
-    auto durationParallel = duration_cast<microseconds>(stopParallel - startParallel);
+    auto finalizaParalela = high_resolution_clock::now();
+    auto duracionParalela = duration_cast<microseconds>(finalizaParalela - iniciaParalela);
 
-    cout << "Tiempo secuencial: " << durationSequential.count() << " microseconds" << endl;
-    cout << "Tiempo paralelo: " << durationParallel.count() << " microseconds" << endl;
-    double speedup = static_cast<double>(durationSequential.count()) / durationParallel.count();
+    cout << "Tiempo secuencial: " << duracionSecuencial.count() << " microseconds" << endl;
+    cout << "Tiempo paralelo: " << duracionParalela.count() << " microseconds" << endl;
+    double speedup = static_cast<double>(duracionSecuencial.count()) / duracionParalela.count();
     cout<<"Speedup: "<<speedup<<endl;
     int num_threads=4;
     double effiency = (speedup/num_threads)*100;
