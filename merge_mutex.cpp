@@ -5,6 +5,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <mutex> // Agregar la librería mutex
 using namespace std;
 using namespace std::chrono;
 using std::cout;
@@ -57,9 +58,12 @@ void mergeParalelo(vector<int>& arr, int l, int m, int r) {
     for (int j = 0; j < n2; j++)
         R[j] = arr[m + 1 + j];
 
-    thread t3([&arr, &L, &n1, &R, &n2, &l]() {
+    mutex mtx; // Declarar el mutex
+
+    thread t1([&arr, &L, &n1, &R, &n2, &l, &mtx]() {
         int i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
+            mtx.lock(); // Bloquear el mutex antes de acceder a la región crítica
             if (L[i] <= R[j]) {
                 arr[k] = L[i];
                 i++;
@@ -68,19 +72,23 @@ void mergeParalelo(vector<int>& arr, int l, int m, int r) {
                 arr[k] = R[j];
                 j++;
             }
+            mtx.unlock(); // Desbloquear el mutex después de acceder a la región crítica
             k++;
         }
 
         while (i < n1) {
+            mtx.lock();
             arr[k] = L[i];
             i++;
             k++;
+            mtx.unlock();
         }
     });
 
-    thread t4([&arr, &L, &n1, &R, &n2, &l, &m, &r]() {
+    thread t2([&arr, &L, &n1, &R, &n2, &l, &m, &r, &mtx]() {
         int i = n1 - 1, j = n2 - 1, k = r;
         while (i >= 0 && j >= 0) {
+            mtx.lock();
             if (L[i] >= R[j]) {
                 arr[k] = L[i];
                 i--;
@@ -89,17 +97,20 @@ void mergeParalelo(vector<int>& arr, int l, int m, int r) {
                 arr[k] = R[j];
                 j--;
             }
+            mtx.unlock();
             k--;
         }
 
         while (j >= 0) {
+            mtx.lock();
             arr[k] = R[j];
             j--;
             k--;
+            mtx.unlock();
         }
     });
-    t3.join();
-    t4.join();
+    t1.join();
+    t2.join();
 }
 
 void mergeSortSecuencial
@@ -145,6 +156,7 @@ int main() {
         }
         file.close();
     } 
+
     int arr_size = arr.size();
     // Inicia el conteo .
     auto startSequential = high_resolution_clock::now();
@@ -162,8 +174,9 @@ int main() {
     auto stopParallel = high_resolution_clock::now();
     auto durationParallel = duration_cast<microseconds>(stopParallel - startParallel);
 
-    cout << "Tiempo secuencial: " << durationSequential.count() << " microseconds" << endl;
-    cout << "Tiempo paralelo: " << durationParallel.count() << " microseconds" << endl;
+    cout << "Tiempo secuencial: " << durationSequential.count() << " ms" << endl;
+    cout << "Tiempo paralelo: " << durationParallel.count() << "ms" << endl;
+    
     double speedup = static_cast<double>(durationSequential.count()) / durationParallel.count();
     cout<<"Speedup: "<<speedup<<endl;
     int num_threads=4;
